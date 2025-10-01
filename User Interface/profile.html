@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Profile</title>
+  <style>
+    /* General layout */
+    body {
+      font-family: 'Poppins', Arial, sans-serif;
+      background: linear-gradient(135deg, #87CEEB, #ffffff);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .container {
+      max-width: 750px;
+      margin: 40px auto;
+      padding: 25px;
+      animation: fadeIn 1.2s ease-in-out;
+    }
+
+    /* Fade animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Header with avatar */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #1e90ff;
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0px 6px 12px rgba(30,144,255,0.3);
+      transition: transform 0.3s ease;
+    }
+
+    .avatar:hover {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .header h1 {
+      color: #1e3a8a;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    /* Card style */
+    .card {
+      background: #ffffffcc;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0px 8px 18px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0px 12px 24px rgba(0,0,0,0.12);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      color: #2563eb;
+      font-size: 22px;
+    }
+
+    /* Profile info */
+    .card p {
+      margin: 8px 0;
+      color: #374151;
+      font-size: 16px;
+    }
+
+    .card strong {
+      color: #1e40af;
+    }
+
+    /* History items */
+    .history-item {
+      border: 1px solid #dbeafe;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+      background: #f0f9ff;
+      box-shadow: 0px 3px 6px rgba(30,144,255,0.1);
+      animation: fadeIn 0.8s ease-in-out;
+    }
+
+    .history-item strong {
+      color: #2563eb;
+    }
+
+    .history-item small {
+      color: #6b7280;
+      font-size: 13px;
+    }
+
+    .back-btn {
+  position: fixed; /* This is the key property */
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 25px;
+  background: linear-gradient(135deg, #007bff, #00bfff);
+  color: white;
+  text-decoration: none;
+  border-radius: 30px;
+  font-weight: bold;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 123, 255, 0.4);
+}
+@media (max-width: 768px) {
+  .container {
+    width: 95%;
+    margin: 20px auto;
+    padding: 20px;
+  }
+  .header {
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  h1 {
+    font-size: 1.8rem;
+  }
+  .card h2 {
+    font-size: 1.2rem;
+  }
+}
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Avatar + Title -->
+    <div class="header">
+      <div id="avatar" class="avatar">U</div>
+      <h1>Profile Page ✨</h1>
+    </div>
+
+    <!-- My Profile Section -->
+    <div class="card">
+      <h2>💙 My Profile</h2>
+      <p><strong>Name:</strong> <span id="name"></span></p>
+      <p><strong>Email:</strong> <span id="email"></span></p>
+      <p><strong>Phone:</strong> <span id="phone"></span></p>
+      <p><strong>Joined:</strong> <span id="joined"></span></p>
+    </div>
+
+    <!-- My History Section -->
+    <div class="card">
+      <h2>📜 My History</h2>
+      <div id="history"></div>
+    </div>
+  </div>
+  </div> <a href="#" onclick="history.back(); return false;" class="back-btn">← Back</a>
+
+  <script>
+    const userId = localStorage.getItem("userId") || 1;  
+
+    // API Base
+    const API_BASE = "http://localhost:5000/api";
+
+    // Fetch Profile
+    fetch(`${API_BASE}/user/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+    document.getElementById("name").innerText = data.user.username;
+    document.getElementById("email").innerText = data.user.email;
+    // Phone is not in your backend, so handle it gracefully
+    document.getElementById("phone").innerText = data.user.phone || "N/A"; 
+    // Joined date is not in your backend, handle it
+    document.getElementById("joined").innerText = data.user.created_at || "N/A";
+
+    // Set Avatar
+    document.getElementById("avatar").innerText = data.user.username.charAt(0).toUpperCase();
+})
+      .catch(err => console.error("Error fetching profile:", err));
+
+    // Fetch History
+    fetch(`${API_BASE}/user/history/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        const historyDiv = document.getElementById("history");
+
+        if (!data.history || data.history.length === 0) {
+          historyDiv.innerHTML = "<p>No scan history yet.</p>";
+          return;
+        }
+
+        data.history.forEach(scan => {
+          const item = document.createElement("div");
+          item.classList.add("history-item");
+          item.innerHTML = `
+  <p><strong>Skin Type:</strong> ${scan.skin_type}</p>
+  <p><strong>Confidence:</strong> ${scan.confidence}%</p>
+  <p><small><strong>Date:</strong> ${scan.timestamp}</small></p>
+`;
+          historyDiv.appendChild(item);
+        });
+      })
+      .catch(err => console.error("Error fetching history:", err));
+  </script>
+</body>
+</html>
+
+   

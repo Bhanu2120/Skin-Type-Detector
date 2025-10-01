@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Precautions</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* --- BODY & PAGE --- */
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+      color: #333;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .page {
+      width: 90%;
+      max-width: 600px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    /* --- PROFILE ICON TOP-RIGHT --- */
+    .profile-avatar {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #2563eb;
+      color: white;
+      font-weight: bold;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 22px;
+      cursor: pointer;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+      transition: transform 0.3s;
+      z-index: 1000;
+    }
+
+    .profile-avatar:hover {
+      transform: scale(1.1);
+    }
+
+    /* --- HEADER --- */
+    h2 {
+      font-size: 2rem;
+      color: #004e92;
+      margin-bottom: 20px;
+      animation: slideDown 1s ease forwards;
+    }
+
+    /* --- PRECAUTION CARDS --- */
+    .precaution-card {
+      background: linear-gradient(135deg, #ffffff, #e0f0ff);
+      border: 2px solid #80c1ff;
+      border-radius: 20px;
+      padding: 20px;
+      width: 100%;
+      max-width: 450px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.1rem;
+      box-shadow: 0 8px 20px rgba(0, 123, 255, 0.2);
+      transition: transform 0.4s, box-shadow 0.4s;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: cardFadeUp 0.8s ease forwards;
+    }
+
+    .precaution-card:nth-child(2) { animation-delay: 0.3s; }
+    .precaution-card:nth-child(3) { animation-delay: 0.6s; }
+    .precaution-card:nth-child(4) { animation-delay: 0.9s; }
+
+    .precaution-card:hover {
+      transform: translateY(-6px) scale(1.03);
+      box-shadow: 0 12px 28px rgba(0, 123, 255, 0.3);
+    }
+
+    .precaution-icon {
+      font-size: 1.8rem;
+      color: #007bff;
+      flex-shrink: 0;
+      animation: bounce 1.5s infinite;
+    }
+
+    /* --- BUTTON --- */
+    .btn {
+      display: inline-block;
+      padding: 12px 25px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 30px;
+      background: linear-gradient(135deg, #007bff, #00bfff);
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 15px;
+      text-decoration: none;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: buttonFadeUp 0.8s ease forwards;
+      animation-delay: 1.2s;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      background: linear-gradient(135deg, #00bfff, #007bff);
+    }
+
+    /* --- ANIMATIONS --- */
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes cardFadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    @keyframes buttonFadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 768px) {
+  .page {
+    width: 95%;
+  }
+  h2 {
+    font-size: 1.8rem;
+  }
+  .precaution-card {
+    font-size: 1rem;
+    padding: 15px;
+  }
+}
+  </style>
+</head>
+<body>
+
+  <!-- PROFILE ICON TOP-RIGHT -->
+  <div id="profileAvatar" class="profile-avatar" onclick="openProfile()">U</div>
+
+  <!-- PAGE CONTENT -->
+  <div class="page">
+    <h2>Before You Glow ✨</h2>
+
+    <!-- PRECAUTION CARDS -->
+    <div class="precaution-card">
+      <span class="precaution-icon">🌞</span>
+      <span>Make sure you have good lighting.</span>
+    </div>
+    <div class="precaution-card">
+      <span class="precaution-icon">💡</span>
+      <span>Ensure your face is clearly visible (no heavy shadows).</span>
+    </div>
+    <div class="precaution-card">
+      <span class="precaution-icon">📱</span>
+      <span>Hold your phone steady / keep webcam focused.</span>
+    </div>
+
+    <button class="btn" onclick="window.location.href='upload.html'">Got it! Let’s Scan 💙</button>
+  </div>
+
+  <script>
+    const userId = localStorage.getItem("userId") || 1;
+    const API_BASE = "http://127.0.0.1:5000/api";
+
+    fetch(`${API_BASE}/user/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+  if (data.user && data.user.username) {
+    document.getElementById("profileAvatar").innerText = data.user.username.charAt(0).toUpperCase();
+  }
+})
+      .catch(err => console.error("Error fetching profile:", err));
+
+    function openProfile() {
+      window.location.href = "profile.html";
+    }
+  </script>
+</body>
+</html>
+
