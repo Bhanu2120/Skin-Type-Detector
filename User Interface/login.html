@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login / Sign Up</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     @keyframes slideUpFadeIn {
   from {
@@ -152,6 +153,10 @@
       font-size: 16px;
       margin: 5px;
     }
+    html, body{ 
+      overflow: hidden;
+      height: 100%;
+    }
   </style>
 </head>
 <body>
@@ -221,7 +226,12 @@ async function signup(){
     const password = document.getElementById('signup-password').value;
 
     if (!name || !phone || !email || !password) {
-        alert('Please fill all fields');
+        Swal.fire({
+          icon: 'warning',
+          title: 'Missing Information',
+          text: 'Please fill out all fields to sign up!',
+          color: '#00558A'
+       });
         return;
     }
 
@@ -235,17 +245,34 @@ async function signup(){
         const result = await response.json();
 
         if (response.ok) {
-            alert(result.message);
-
-            localStorage.setItem('userId', result.user_id);
-            localStorage.setItem('userName', name);
-
-            window.location.href = 'precautions.html';
+            // Show a success pop-up
+    Swal.fire({
+        icon: 'success',  // This adds the green tick mark!
+        title: 'Registered!',
+        text: result.message,
+        timer: 2000,      // Pop-up will close automatically after 2 seconds
+        showConfirmButton: false // Hides the "OK" button
+    }).then(() => {
+        // This code runs AFTER the pop-up closes
+        localStorage.setItem('userId', result.user_id);
+        localStorage.setItem('userName', name);
+        window.location.href = 'precautions.html';
+    });
         } else {
-            alert(`Sign Up Failed: ${result.message}`);
+            Swal.fire({
+              icon: 'error',
+              title: 'Sign Up Failed',
+              text: result.message,
+              color: '#00558A'
+          });
         }
     } catch (error) {
-        alert('Network error. Is the backend server running?');
+        Swal.fire({
+           icon: 'error',
+           title: 'Network Error',
+           text: 'Could not connect to the server. Please try again later.',
+          color: '#00558A'
+        });
         console.error(error);
     }
 }
@@ -256,7 +283,12 @@ async function signup(){
         const password = document.getElementById('login-password').value;
 
         if (!email || !password) {
-            alert('Please enter email and password');
+            Swal.fire({
+              icon: 'warning',
+              title: 'Missing Information',
+              text: 'Please enter your email and password!',
+              color: '#00558A'
+            });
             return;
         }
 
@@ -274,21 +306,35 @@ async function signup(){
 
             const result = await response.json();
 
-            if (response.ok) {
-                // CHANGED HERE: The backend sends 'username', not 'name'
-                alert(`Login successful for ${result.username}!`);
-
-                // Store login user info
-                localStorage.setItem('userId', result.user_id);
-                localStorage.setItem('userName', result.username); // CHANGED HERE
-
-                // Go to precautions page after login
-                window.location.href = 'precautions.html';
-            } else {
-                alert(`Login Failed: ${result.message}`);
-            }
-        } catch (error) {
-            alert('Network error. Is the backend server running?');
+  if (response.ok) {
+    Swal.fire({
+      icon: 'success',
+      title: `Welcome back, ${result.username}!`,
+      text: 'You are now logged in.',
+      color: '#00558A',
+      timer: 2000,
+      showConfirmButton: false
+    }).then(() => {
+      // Store login user info
+      localStorage.setItem('userId', result.user_id);
+      localStorage.setItem('userName', result.username);
+      // Go to precautions page after login
+      window.location.href = 'precautions.html';
+    });
+} else {
+    Swal.fire({
+      icon: 'error', // This adds a red "X" icon
+      title: 'Login Failed',
+      text: result.message
+    });
+  }
+} catch (error) {
+            Swal.fire({
+             icon: 'error',
+             title: 'Network Error',
+             text: 'Could not connect to the server. Please try again later.',
+             color: '#00558A'
+            });
             console.error(error);
         }
     }
