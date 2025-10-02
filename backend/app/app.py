@@ -18,6 +18,21 @@ from werkzeug.utils import secure_filename
 from flask_bcrypt import Bcrypt
 import requests
 
+def download_file(url, save_path):
+    if not os.path.exists(save_path):
+        print(f"Model file not found. Downloading from {url}...")
+        try:
+            with requests.get(url, stream=True) as r:
+                r.raise_for_status()
+                with open(save_path, 'wb') as f:
+                    for chunk in r.iter_content(chunk_size=8192):
+                        f.write(chunk)
+            print(f"Downloaded {os.path.basename(save_path)} successfully.")
+        except Exception as e:
+            # If download fails, delete the partially downloaded file
+            if os.path.exists(save_path):
+                os.remove(save_path)
+            raise RuntimeError(f"Failed to download model file from {url}. Error: {e}")
 # Allowlist the layers/activations your model uses
 torch.serialization.add_safe_globals([
     nn.Conv2d,
@@ -48,14 +63,21 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 db = SQLAlchemy(app)
 
-# --- Load the Caffe DNN Face Detector Model ---
-prototxt_path = os.path.join(basedir, 'deploy.prototxt.txt')
+# --- Define Model URLs and Download Models on Startup ---
+PROTOTXT_URL = "https://huggingface.co/Bhanu2120/Skin-type-detector-models/resolve/main/deploy.prototxt"
+CAFFE_MODEL_URL = "https://huggingface.co/Bhanu2120/Skin-type-detector-models/resolve/main/res10_300x300_ssd_iter_140000.caffemodel"
+PYTORCH_MODEL_URL = "https://huggingface.co/Bhanu2120/Skin-type-detector-models/resolve/main/skin_type_detector_app_full.pth"
+
+prototxt_path = os.path.join(basedir, 'deploy.prototxt')
 weights_path = os.path.join(basedir, 'res10_300x300_ssd_iter_140000.caffemodel')
+MODEL_PATH = os.path.join(basedir, 'skin_type_detector_app_full.pth')
 
-# Check if model files exist
-if not os.path.exists(prototxt_path) or not os.path.exists(weights_path):
-    raise FileNotFoundError("DNN model files not found. Please download deploy.prototxt and the caffemodel file.")
+print("Checking for model files...")
+download_file(PROTOTXT_URL, prototxt_path)
+download_file(CAFFE_MODEL_URL, weights_path)
+download_file(PYTORCH_MODEL_URL, MODEL_PATH)
 
+# --- Load models from the (now existing) local files ---
 net = cv2.dnn.readNetFromCaffe(prototxt_path, weights_path)
 print("✅ Caffe DNN face detector loaded successfully.")
 
