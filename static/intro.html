@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skin Type Detector - Landing</title>
+  <style>
+    /* Import Poppins font (assuming you had a link in the original style.css) */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Poppins', sans-serif;
+      overflow-x: hidden;
+      /* Sky blue + white gradient background */
+      background: linear-gradient(to bottom, #a3d9ff, #ffffff);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    html, body{ 
+      overflow: hidden;
+      height: 100%;
+    }
+    .landing-container {
+      text-align: center;
+      animation: fadeIn 2s ease forwards;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      color: black;
+      text-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+      margin-bottom: 50px;
+      animation: fadeUp 2s ease forwards;
+    }
+
+    /* Next arrow button */
+    .next-btn {
+      display: inline-block;
+      font-size: 1.5rem;
+      padding: 12px 25px;
+      border-radius: 50px;
+      background: #00bfff;
+      color: white;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0,191,255,0.4);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      animation: bounce 2s infinite; /* Added bounce animation */
+    }
+
+    .next-btn:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,191,255,0.6);
+    }
+    
+    /* Footer */
+    footer {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        text-align: center;
+        color: #00bfff;
+        font-size: 14px;
+        padding: 15px 0;
+        border-top: 1px solid #00bfff;
+    }
+
+    /* --- Animations --- */
+    @keyframes fadeIn {
+      0% {opacity:0;}
+      100% {opacity:1;}
+    }
+
+    @keyframes fadeUp {
+      0% {opacity:0; transform: translateY(20px);}
+      100% {opacity:1; transform: translateY(0);}
+    }
+
+    /* Bounce arrow */
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0);}
+      40% { transform: translateY(-10px);}
+      60% { transform: translateY(-5px);}
+    }
+
+    /* Floating clouds or shapes */
+    .shape {
+      position: absolute;
+      background: #ffffff80;
+      border-radius: 50%;
+      animation: float 6s ease-in-out infinite;
+      filter: blur(5px); /* Soften the edges */
+    }
+    .shape1 { width: 100px; height: 100px; top: 20%; left: 10%; animation-delay: 0s;}
+    .shape2 { width: 70px; height: 70px; top: 50%; left: 80%; animation-delay: 2s;}
+    .shape3 { width: 50px; height: 50px; top: 75%; left: 30%; animation-delay: 4s;}
+    
+    @media (max-width: 600px) {
+        h1 { font-size: 2rem; }
+        .shape1 { width: 70px; height: 70px; top: 15%; left: 5%;}
+        .shape2 { width: 50px; height: 50px; top: 60%; left: 85%;}
+        .shape3 { width: 40px; height: 40px; top: 80%; left: 20%;}
+    }
+
+
+    @keyframes float {
+      0% { transform: translateY(0);}
+      50% { transform: translateY(-20px);}
+      100% { transform: translateY(0);}
+    }
+    @media (max-width: 768px) {
+  .page {
+    /* Make the main box fit the screen better */
+    width: 90%;
+    padding: 30px 20px;
+  }
+  h2 {
+    /* Reduce the title font size */
+    font-size: 2rem;
+  }
+  .placeholder-img {
+    /* Make the camera icon smaller */
+    width: 100px;
+    height: 100px;
+    font-size: 40px;
+  }
+  p {
+    font-size: 15px;
+  }
+}
+  </style>
+</head>
+<body>
+
+  
+  <div class="shape shape1"></div>
+  <div class="shape shape2"></div>
+  <div class="shape shape3"></div>
+
+  <div class="landing-container">
+    <h1>Let's skip ourselves from reality 💭</h1>
+    <a href="landing.html" class="next-btn">Next →</a>
+  </div>
+</body>
+</html>
