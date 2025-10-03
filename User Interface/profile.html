@@ -158,6 +158,31 @@ html, body{
       overflow: hidden;
       height: 100%;
     }
+#history {
+  /* Set a maximum height for the history box. 
+     40vh means it will take up at most 40% of the screen's height. */
+  max-height: 40vh;
+  
+  /* This is the key: it adds a vertical scrollbar ONLY when the content is too long. */
+  overflow-y: auto;
+  
+  /* A little padding to prevent the scrollbar from touching the text */
+  padding-right: 10px;
+}
+
+/* --- Optional: A more aesthetic scrollbar --- */
+#history::-webkit-scrollbar {
+  width: 8px;
+}
+#history::-webkit-scrollbar-track {
+  background: #f0f9ff;
+  border-radius: 10px;
+}
+#history::-webkit-scrollbar-thumb {
+  background-color: #2563eb;
+  border-radius: 10px;
+  border: 2px solid #f0f9ff; /* Creates a nice padding effect */
+}
   </style>
 </head>
 <body>
