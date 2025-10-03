@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 import torch.serialization
 from torchvision import transforms
-import torchvision.models as tvmodels  # <-- THIS IS THE CORRECT, STANDARD WAY
+import torchvision.models as tvmodels 
 from torchvision.models.resnet import ResNet
 from PIL import Image
 from datetime import datetime
@@ -17,6 +17,7 @@ from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from flask_bcrypt import Bcrypt
 import requests
+from flask import Flask, send_from_directory
 
 def download_file(url, save_path):
     if not os.path.exists(save_path):
@@ -453,6 +454,16 @@ def get_user_history(user_id):
         } for s in scans
     ]
     return jsonify({"status":"success", "history": history}), 200
+
+@app.route('/')
+def index():
+    # This serves intro.html as the homepage
+    return send_from_directory('static', 'intro.html') # <-- This line is changed
+
+@app.route('/<path:path>')
+def serve_static_files(path):
+    # This serves all the other files like login.html, style.css, etc.
+    return send_from_directory('static', path)
 
 # ------------------------
 # 10. Run App
