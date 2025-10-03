@@ -176,7 +176,7 @@ html, body{
 
   <script>
     const userId = localStorage.getItem("userId") || 1;
-    const API_BASE = "http://127.0.0.1:5000/api";
+    const API_BASE_URL = '/api';
 
     fetch(`${API_BASE}/user/${userId}`)
       .then(res => res.json())

@@ -215,7 +215,7 @@ html, body{
     const userId = localStorage.getItem("userId") || 1;  
 
     // API Base
-    const API_BASE = "http://localhost:5000/api";
+    const API_BASE_URL = '/api';
 
     // Fetch Profile
     fetch(`${API_BASE}/user/${userId}`)
