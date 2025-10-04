@@ -54,8 +54,13 @@ CORS(app, resources={r"/api/*": {"origins": "https://skin-type-detector.onrender
 bcrypt = Bcrypt(app)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'skin_detector.db')
+database_url = os.environ.get('DATABASE_URL')
+if database_url:
+    # On Render, SQLAlchemy needs 'postgresql://' instead of 'postgres://'
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url.replace("postgres://", "postgresql://")
+else:
+    # For local testing, use the old SQLite database
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'skin_detector.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 UPLOAD_FOLDER = os.path.join(basedir, 'uploads')
