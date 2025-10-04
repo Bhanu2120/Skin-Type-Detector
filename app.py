@@ -109,6 +109,9 @@ class Scan(db.Model):
     confidence = db.Column(db.Float, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+with app.app_context():
+    db.create_all()
+
 # ------------------------
 # 3. Load PyTorch Model (robust)
 # ------------------------
@@ -474,7 +477,5 @@ def serve_static_files(path):
 # 10. Run App
 # ------------------------
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     load_model()  # will raise helpful errors if model can't be loaded
     app.run(host='0.0.0.0', port=5000, debug=True)
