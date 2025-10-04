@@ -50,7 +50,7 @@ torch.serialization.add_safe_globals([
 # 1. Flask App Setup
 # ------------------------
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "https://skin-type-detector.onrender.com"}})
 bcrypt = Bcrypt(app)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
