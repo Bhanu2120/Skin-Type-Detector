@@ -218,7 +218,7 @@ html, body{
     const API_BASE_URL = '/api';
 
     // Fetch Profile
-    fetch(`${API_BASE}/user/${userId}`)
+    fetch(`${API_BASE_URL}/user/${userId}`)
       .then(res => res.json())
       .then(data => {
     document.getElementById("name").innerText = data.user.username;
@@ -234,7 +234,7 @@ html, body{
       .catch(err => console.error("Error fetching profile:", err));
 
     // Fetch History
-    fetch(`${API_BASE}/user/history/${userId}`)
+    fetch(`${API_BASE_URL}/user/history/${userId}`)
       .then(res => res.json())
       .then(data => {
         const historyDiv = document.getElementById("history");
