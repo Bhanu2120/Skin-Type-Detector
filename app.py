@@ -271,8 +271,6 @@ def predict_skin_type(image_input):
 # 6. API Endpoint: /predict (improved - reads file.stream)
 # ------------------------
 
-# In app.py, replace your entire /api/predict function
-
 @app.route('/api/predict', methods=['POST'])
 def predict():
     user_id = request.form.get('user_id')
@@ -286,7 +284,7 @@ def predict():
     # --- THIS IS THE LINE THAT IS FIXED ---
     # We replace the old np.fromstring with the modern np.frombuffer
     npimg = np.frombuffer(filestr, np.uint8)
-    # --- END OF FIX ---
+   
     
     image_cv = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
     
@@ -303,13 +301,8 @@ def predict():
     net.setInput(blob)
     detections = net.forward()
 
-    best_detection_index = -1
-    highest_confidence = 0.0
-    for i in range(0, detections.shape[2]):
-        confidence = detections[0, 0, i, 2]
-        if confidence > highest_confidence:
-            highest_confidence = confidence
-            best_detection_index = i
+    best_detection_index = np.argmax(detections[0, 0, :, 2])
+    highest_confidence = detections[0, 0, best_detection_index, 2]
 
     if highest_confidence < 0.5:
         return jsonify({"status": "error", "message": "No face detected. Please upload a clear photo of your face."}), 400
@@ -465,9 +458,7 @@ def get_user_history(user_id):
 
 @app.route('/')
 def index():
-    # This serves intro.html as the homepage
-    return send_from_directory('static', 'intro.html') # <-- This line is changed
-
+    return send_from_directory('static', 'intro.html') 
 @app.route('/<path:path>')
 def serve_static_files(path):
     # This serves all the other files like login.html, style.css, etc.
@@ -477,5 +468,5 @@ def serve_static_files(path):
 # 10. Run App
 # ------------------------
 if __name__ == '__main__':
-    load_model()  # will raise helpful errors if model can't be loaded
+    load_model()  
     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -178,7 +178,7 @@ html, body{
     const userId = localStorage.getItem("userId") || 1;
     const API_BASE_URL = '/api';
 
-    fetch(`${API_BASE}/user/${userId}`)
+    fetch(`${API_BASE_URL}/user/${userId}`)
       .then(res => res.json())
       .then(data => {
   if (data.user && data.user.username) {
