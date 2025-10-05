@@ -87,6 +87,8 @@ download_file(PYTORCH_MODEL_URL, MODEL_PATH)
 net = cv2.dnn.readNetFromCaffe(prototxt_path, weights_path)
 print("✅ Caffe DNN face detector loaded successfully.")
 
+print(f"DEBUG: prototxt size: {os.path.getsize(prototxt_path)} bytes, caffemodel size: {os.path.getsize(weights_path)} bytes")
+
 # ------------------------
 # 2. Database Models
 # ------------------------
