@@ -69,14 +69,15 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 db = SQLAlchemy(app)
 
-# --- Define Model URLs and Download Models on Startup ---
-PROTOTXT_URL = "https://huggingface.co/Bhanu2120/Skin-type-detector-models/resolve/main/deploy.prototxt"
-CAFFE_MODEL_URL = "https://huggingface.co/Bhanu2120/Skin-type-detector-models/resolve/main/res10_300x300_ssd_iter_140000.caffemodel"
-PYTORCH_MODEL_URL = "https://huggingface.co/Bhanu2120/Skin-type-detector-models/resolve/main/skin_type_detector_app_full.pth"
+# --- Get Model URLs from Environment Variables and Download Models ---
+PROTOTXT_URL = os.environ.get('PROTOTXT_URL')
+CAFFE_MODEL_URL = os.environ.get('CAFFE_MODEL_URL')
+PYTORCH_MODEL_URL = os.environ.get('PYTORCH_MODEL_URL')
 
+TEMP_DIR = '/tmp'
 prototxt_path = os.path.join(basedir, 'deploy.prototxt')
 weights_path = os.path.join(basedir, 'res10_300x300_ssd_iter_140000.caffemodel')
-MODEL_PATH = os.path.join(basedir, 'skin_type_detector_app_full.pth')
+MODEL_PATH = os.path.join('/tmp', 'skin_type_detector_app_full.pth')
 
 print("Checking for model files...")
 download_file(PROTOTXT_URL, prototxt_path)
