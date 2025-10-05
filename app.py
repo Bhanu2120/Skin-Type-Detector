@@ -306,7 +306,7 @@ def predict():
     best_detection_index = np.argmax(detections[0, 0, :, 2])
     highest_confidence = detections[0, 0, best_detection_index, 2]
 
-    if highest_confidence < 0.5:
+    if highest_confidence < 0.3:
         return jsonify({"status": "error", "message": "No face detected. Please upload a clear photo of your face."}), 400
 
     box = detections[0, 0, best_detection_index, 3:7] * np.array([w, h, w, h])
