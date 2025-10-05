@@ -150,7 +150,7 @@ def load_model():
 
             # Try a ResNet18-based architecture first (common)
             try:
-                model = tvmodels.resnet18(pretrained=False)
+                model = tvmodels.resnet50(weights=None)
                 model.fc = nn.Linear(model.fc.in_features, len(SKIN_CLASSES))
                 model.load_state_dict(state_dict)
                 MODEL = model
@@ -308,7 +308,7 @@ def predict():
 
     print(f"!!! FINAL CHECK !!! Highest confidence detected: {highest_confidence:.4f}")
 
-    if highest_confidence < 0.3:
+    if highest_confidence < 0.2:
         return jsonify({"status": "error", "message": "No face detected. Please upload a clear photo of your face."}), 400
 
     box = detections[0, 0, best_detection_index, 3:7] * np.array([w, h, w, h])
