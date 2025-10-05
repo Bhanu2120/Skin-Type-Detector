@@ -306,6 +306,8 @@ def predict():
     best_detection_index = np.argmax(detections[0, 0, :, 2])
     highest_confidence = detections[0, 0, best_detection_index, 2]
 
+    print(f"!!! FINAL CHECK !!! Highest confidence detected: {highest_confidence:.4f}")
+
     if highest_confidence < 0.3:
         return jsonify({"status": "error", "message": "No face detected. Please upload a clear photo of your face."}), 400
 
@@ -375,7 +377,7 @@ def get_user_profile(user_id):
             "username": user.username,
             "email": user.email,
             "avatar": avatar_url,
-            "phone": user.phone or "N/A",
+            "phone": user.phone,
             "created_at": user.created_at.strftime("%Y-%m-%d")
         }
     }), 200
