@@ -50,7 +50,7 @@ torch.serialization.add_safe_globals([
 # 1. Flask App Setup
 # ------------------------
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "https://skin-type-detector.onrender.com"}})
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 bcrypt = Bcrypt(app)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -232,6 +232,50 @@ def login():
         return jsonify({"status":"success","user_id":user.id, "username": user.username})
     else:
         return jsonify({"status":"error","message":"Invalid credentials"}), 401
+
+# In app.py, add this entire new function
+
+@app.route('/api/selftest')
+def selftest():
+    # This is a URL to a standard, high-quality face image
+    test_image_url = "https://www.biometricupdate.com/wp-content/uploads/2022/08/face-biometrics-on-a-woman-at-a-un-refugee-camp-scaled.jpg"
+    
+    try:
+        print("--- RUNNING SELF-TEST ---")
+        # Download the image
+        response = requests.get(test_image_url)
+        filestr = response.content
+        npimg = np.frombuffer(filestr, np.uint8)
+        image_cv = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
+
+        if image_cv is None:
+            return jsonify({"status": "error", "message": "SELF-TEST FAILED: Could not decode test image."}), 500
+
+        # Run the exact same face detection logic
+        (h, w) = image_cv.shape[:2]
+        blob = cv2.dnn.blobFromImage(cv2.resize(image_cv, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
+        net.setInput(blob)
+        detections = net.forward()
+        highest_confidence = np.max(detections[0, 0, :, 2])
+
+        print(f"--- SELF-TEST RESULT --- Confidence: {highest_confidence:.4f}")
+
+        if highest_confidence > 0.3:
+            return jsonify({
+                "status": "success",
+                "message": "SELF-TEST PASSED: The face detector is working correctly on the server.",
+                "confidence": f"{highest_confidence:.4f}"
+            })
+        else:
+            return jsonify({
+                "status": "error",
+                "message": "SELF-TEST FAILED: The face detector is NOT working on the server.",
+                "confidence": f"{highest_confidence:.4f}"
+            }), 500
+
+    except Exception as e:
+        print(f"--- SELF-TEST CRASHED --- Error: {e}")
+        return jsonify({"status": "error", "message": f"An exception occurred during self-test: {e}"}), 500
 
 # ------------------------
 # 5. Prediction Function (accepts PIL.Image or path)
