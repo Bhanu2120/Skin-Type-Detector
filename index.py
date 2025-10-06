@@ -555,6 +555,6 @@ def serve_static_files(path):
 # ------------------------
 # 10. Run App
 # ------------------------
-#if __name__ == '__main__':
-#   load_model()  
-#   app.run(host='0.0.0.0', port=5000, debug=True)
+if __name__ == '__main__':
+    load_model()  
+    app.run(host='0.0.0.0', port=5000, debug=True)
