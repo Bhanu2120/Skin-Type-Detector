@@ -11,3 +11,8 @@ p { margin-bottom:15px; font-size:1.2rem; line-height:1.5;}
 .hidden { display:none;}
 video.hidden { display:none;}
 .scan-card { background:#ffffffcc; border-radius:20px; padding:20px; width:300px; text-align:center; box-shadow:0 8px 20px rgba(0,0,0,0.1); margin-top:20px;}
+@media (max-width: 768px) {
+  body {
+    overflow: auto;
+  }
+}

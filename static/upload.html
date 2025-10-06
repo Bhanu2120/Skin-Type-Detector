@@ -52,7 +52,6 @@
   left: 20px;
   z-index: 1000;
   display: inline-block;
-  margin-top: 20px;
   padding: 10px 25px;
   background: linear-gradient(135deg, #007bff, #00bfff);
   color: white;
@@ -117,10 +116,14 @@
     top: 15px;           
     left:15px;
   }
-
-  footer {
-    
+  footer {  
     font-size: 12px;
+  }
+  body {
+  overflow: auto;
+}
+back-btn:hover, .back-btn:active {
+    transform: scale(1.05); /* Use a smaller scale effect for mobile */
   }
 }
 

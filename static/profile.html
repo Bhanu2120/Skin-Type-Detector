@@ -15,6 +15,7 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
+      overflow:hidden;
     }
     .container {
       max-width: 750px;
@@ -116,13 +117,13 @@
     }
 
     .back-btn {
-  position: fixed; /* This is the key property */
+  position: fixed;
   top: 20px;
   left: 20px;
   z-index: 1000;
+  padding: 10px 25px;
   display: inline-block;
   margin-top: 20px;
-  padding: 10px 25px;
   background: linear-gradient(135deg, #007bff, #00bfff);
   color: white;
   text-decoration: none;
@@ -154,19 +155,16 @@
     font-size: 1.2rem;
   }
   .back-btn {
-    padding: 8px 20px;  
-    font-size: 0.9rem;    
-    top: 15px;           
-    left:15px;
+    padding: 8px 20px;
+    font-size: 0.9rem;
+    top: 15px;
+    left: 15px;
   }
   body {
     overflow: auto;
   }
 }
-html, body{ 
-      overflow: hidden;
-      height: 100%;
-    }
+
 #history {
   /* Set a maximum height for the history box. 
      40vh means it will take up at most 40% of the screen's height. */
