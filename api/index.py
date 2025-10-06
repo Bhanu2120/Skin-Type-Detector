@@ -70,14 +70,14 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 db = SQLAlchemy(app)
 
 # --- Get Model URLs from Environment Variables and Download Models ---
-PROTOTXT_URL = os.environ.get('PROTOTXT_URL')
-CAFFE_MODEL_URL = os.environ.get('CAFFE_MODEL_URL')
-PYTORCH_MODEL_URL = os.environ.get('PYTORCH_MODEL_URL')
+PROTOTXT_URL = "https://huggingface.co/Bhanu2120/Skin-type-detector-models/resolve/main/deploy.prototxt"
+CAFFE_MODEL_URL = "https://huggingface.co/Bhanu2120/Skin-type-detector-models/resolve/main/res10_300x300_ssd_iter_140000.caffemodel"
+PYTORCH_MODEL_URL = "https://huggingface.co/Bhanu2120/Skin-type-detector-models/resolve/main/skin_type_detector_app_full.pth"
 
-TEMP_DIR = '/tmp'
+
 prototxt_path = os.path.join(basedir, 'deploy.prototxt')
 weights_path = os.path.join(basedir, 'res10_300x300_ssd_iter_140000.caffemodel')
-MODEL_PATH = os.path.join('/tmp', 'skin_type_detector_app_full.pth')
+MODEL_PATH = os.path.join(basedir, 'skin_type_detector_app_full.pth')
 
 print("Checking for model files...")
 download_file(PROTOTXT_URL, prototxt_path)
@@ -234,50 +234,6 @@ def login():
     else:
         return jsonify({"status":"error","message":"Invalid credentials"}), 401
 
-# In app.py, add this entire new function
-
-@app.route('/api/selftest')
-def selftest():
-    # This is a URL to a standard, high-quality face image
-    test_image_url = "https://www.biometricupdate.com/wp-content/uploads/2022/08/face-biometrics-on-a-woman-at-a-un-refugee-camp-scaled.jpg"
-    
-    try:
-        print("--- RUNNING SELF-TEST ---")
-        # Download the image
-        response = requests.get(test_image_url)
-        filestr = response.content
-        npimg = np.frombuffer(filestr, np.uint8)
-        image_cv = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
-
-        if image_cv is None:
-            return jsonify({"status": "error", "message": "SELF-TEST FAILED: Could not decode test image."}), 500
-
-        # Run the exact same face detection logic
-        (h, w) = image_cv.shape[:2]
-        blob = cv2.dnn.blobFromImage(cv2.resize(image_cv, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
-        net.setInput(blob)
-        detections = net.forward()
-        highest_confidence = np.max(detections[0, 0, :, 2])
-
-        print(f"--- SELF-TEST RESULT --- Confidence: {highest_confidence:.4f}")
-
-        if highest_confidence > 0.3:
-            return jsonify({
-                "status": "success",
-                "message": "SELF-TEST PASSED: The face detector is working correctly on the server.",
-                "confidence": f"{highest_confidence:.4f}"
-            })
-        else:
-            return jsonify({
-                "status": "error",
-                "message": "SELF-TEST FAILED: The face detector is NOT working on the server.",
-                "confidence": f"{highest_confidence:.4f}"
-            }), 500
-
-    except Exception as e:
-        print(f"--- SELF-TEST CRASHED --- Error: {e}")
-        return jsonify({"status": "error", "message": f"An exception occurred during self-test: {e}"}), 500
-
 # ------------------------
 # 5. Prediction Function (accepts PIL.Image or path)
 # ------------------------
@@ -285,8 +241,10 @@ def predict_skin_type(image_input):
     transform = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                             std=[0.229, 0.224, 0.225])
+        transforms.Normalize(
+            mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225]
+        )
     ])
 
     if isinstance(image_input, Image.Image):
@@ -298,15 +256,21 @@ def predict_skin_type(image_input):
 
     with torch.no_grad():
         outputs = MODEL(img_tensor)
+
+        # Ensure output has batch dimension
         if outputs.dim() == 1:
             outputs = outputs.unsqueeze(0)
+
         probs = torch.softmax(outputs, dim=1).cpu().numpy()[0]
 
-    predicted_idx = int(probs.argmax())
-    skin_type = SKIN_CLASSES[predicted_idx]
-    confidence = float(probs[predicted_idx] * 100)
+        predicted_idx = int(probs.argmax())
+        skin_type = SKIN_CLASSES[predicted_idx]
+        confidence = float(probs[predicted_idx] * 100)
 
-    detailed_scores = [{"type": cls, "score": float(prob)} for cls, prob in zip(SKIN_CLASSES, probs)]
+        detailed_scores = [
+            {"type": cls, "score": float(prob)}
+            for cls, prob in zip(SKIN_CLASSES, probs)
+        ]
 
     return {
         "skin_type": skin_type,
@@ -314,12 +278,19 @@ def predict_skin_type(image_input):
         "detailed_scores": detailed_scores
     }
 
+
 # ------------------------
 # 6. API Endpoint: /predict (improved - reads file.stream)
 # ------------------------
 
 @app.route('/api/predict', methods=['POST'])
 def predict():
+    global MODEL
+    if MODEL is None:
+        try:
+            load_model()
+        except Exception as e:
+            return jsonify({"status": "error", "message": f"Failed to load model: {e}"}), 500
     user_id = request.form.get('user_id')
     file = request.files.get('image')
 
@@ -360,6 +331,8 @@ def predict():
     (startX, startY, endX, endY) = box.astype("int")
 
     face_roi = image_cv[startY:endY, startX:endX]
+    if face_roi is None or face_roi.size == 0:
+        return jsonify({"status": "error", "message": "Invalid face region detected"}), 400
     face_pil = Image.fromarray(cv2.cvtColor(face_roi, cv2.COLOR_BGR2RGB))
 
     try:
@@ -380,6 +353,72 @@ def predict():
     except Exception as e:
         print("Prediction failed:", e)
         return jsonify({"status": "error", "message": f"Prediction failed: {e}"}), 500
+    
+# In app.py, add this entire new function
+@app.route('/api/selftest')
+def selftest():
+    global MODEL
+    if MODEL is None:
+        try:
+            load_model()
+        except Exception as e:
+            return jsonify({"status": "error", "message": f"SELF-TEST FAILED: Model load error: {e}"}), 500
+
+    test_image_url = "https://www.biometricupdate.com/wp-content/uploads/2022/08/face-biometrics-on-a-woman-at-a-un-refugee-camp-scaled.jpg"
+    
+    try:
+        print("--- RUNNING SELF-TEST ---")
+        # Download the image
+        response = requests.get(test_image_url)
+        filestr = response.content
+        npimg = np.frombuffer(filestr, np.uint8)
+        image_cv = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
+
+        if image_cv is None:
+            return jsonify({"status": "error", "message": "SELF-TEST FAILED: Could not decode test image."}), 500
+
+        # Run the face detection logic
+        (h, w) = image_cv.shape[:2]
+        blob = cv2.dnn.blobFromImage(cv2.resize(image_cv, (300, 300)), 1.0,
+                                     (300, 300), (104.0, 177.0, 123.0))
+        net.setInput(blob)
+        detections = net.forward()
+        best_idx = np.argmax(detections[0, 0, :, 2])
+        highest_confidence = float(detections[0, 0, best_idx, 2])  # ✅ force float
+
+        print(f"--- SELF-TEST RESULT --- Confidence: {highest_confidence:.4f}")
+
+        if highest_confidence < 0.2:
+            return jsonify({
+                "status": "error",
+                "message": "SELF-TEST FAILED: No clear face detected in test image.",
+                "confidence": highest_confidence
+            }), 500
+
+        # Extract face region
+        box = detections[0, 0, best_idx, 3:7] * np.array([w, h, w, h])
+        (startX, startY, endX, endY) = box.astype("int")
+        face_roi = image_cv[startY:endY, startX:endX]
+
+        if face_roi is None or face_roi.size == 0:
+            return jsonify({"status": "error", "message": "SELF-TEST FAILED: Invalid face ROI"}), 500
+
+        # Convert to PIL for prediction
+        face_pil = Image.fromarray(cv2.cvtColor(face_roi, cv2.COLOR_BGR2RGB))
+        result = predict_skin_type(face_pil)
+
+        return jsonify({
+            "status": "success",
+            "message": "SELF-TEST PASSED: Detector + model both working.",
+            "confidence": result["confidence"],
+            "skin_type": result["skin_type"]
+        })
+
+    except Exception as e:
+        print(f"--- SELF-TEST CRASHED --- Error: {e}")
+        return jsonify({"status": "error", "message": f"An exception occurred during self-test: {e}"}), 500
+
+
 # ------------------------
 # 7. API Endpoint: /scan/save (explicit)
 # ------------------------
