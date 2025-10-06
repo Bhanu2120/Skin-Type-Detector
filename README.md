@@ -4,9 +4,13 @@ A full-stack web application that uses a deep learning model to classify your sk
 Features:
 
 (1) 👤 User Authentication: Secure sign-up and login functionality.
+
 (2) 📸 Image Upload: Users can upload a photo from their gallery or take one directly using their device's camera or webcam.
+
 (3) 🧠 AI-Powered Analysis: A two-step process first detects a face in the image and then classifies the skin type.
+
 (4) 📊 User Profiles & History: Registered users can view their profile and a complete history of their past scans.
+
 (5) 📱 Responsive Design: A clean and modern UI that works seamlessly on both desktop and mobile devices.
 
 Tech Stack:
