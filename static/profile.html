@@ -166,18 +166,11 @@
 }
 
 #history {
-  /* Set a maximum height for the history box. 
-     40vh means it will take up at most 40% of the screen's height. */
   max-height: 40vh;
-  
-  /* This is the key: it adds a vertical scrollbar ONLY when the content is too long. */
   overflow-y: auto;
-  
-  /* A little padding to prevent the scrollbar from touching the text */
   padding-right: 10px;
 }
 
-/* --- Optional: A more aesthetic scrollbar --- */
 #history::-webkit-scrollbar {
   width: 8px;
 }
@@ -188,7 +181,7 @@
 #history::-webkit-scrollbar-thumb {
   background-color: #2563eb;
   border-radius: 10px;
-  border: 2px solid #f0f9ff; /* Creates a nice padding effect */
+  border: 2px solid #f0f9ff; 
 }
   </style>
 </head>
@@ -230,9 +223,7 @@
       .then(data => {
     document.getElementById("name").innerText = data.user.username;
     document.getElementById("email").innerText = data.user.email;
-    // Phone is not in your backend, so handle it gracefully
     document.getElementById("phone").innerText = data.user.phone || "N/A"; 
-    // Joined date is not in your backend, handle it
     document.getElementById("joined").innerText = data.user.created_at || "N/A";
 
     // Set Avatar

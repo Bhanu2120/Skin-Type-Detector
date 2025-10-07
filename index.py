@@ -1,6 +1,7 @@
 import os
 import time
 import io
+import gc #Garbage Collector
 import cv2
 import numpy as np
 import torch
@@ -69,7 +70,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 db = SQLAlchemy(app)
 
-# --- Get Model URLs from Environment Variables and Download Models ---
+
 PROTOTXT_URL = "https://huggingface.co/Bhanu2120/Skin-type-detector-models/resolve/main/deploy.prototxt"
 CAFFE_MODEL_URL = "https://huggingface.co/Bhanu2120/Skin-type-detector-models/resolve/main/res10_300x300_ssd_iter_140000.caffemodel"
 PYTORCH_MODEL_URL = "https://huggingface.co/Bhanu2120/Skin-type-detector-models/resolve/main/skin_type_detector_app_full.pth"
@@ -85,7 +86,12 @@ download_file(CAFFE_MODEL_URL, weights_path)
 download_file(PYTORCH_MODEL_URL, MODEL_PATH)
 
 # --- Load models from the (now existing) local files ---
-net = cv2.dnn.readNetFromCaffe(prototxt_path, weights_path)
+def get_face_net():
+    global net
+    if 'net' not in globals() or net is None:
+        net = cv2.dnn.readNetFromCaffe(prototxt_path, weights_path)
+    return net
+
 print("✅ Caffe DNN face detector loaded successfully.")
 
 print(f"DEBUG: prototxt size: {os.path.getsize(prototxt_path)} bytes, caffemodel size: {os.path.getsize(weights_path)} bytes")
@@ -187,6 +193,8 @@ def load_model():
 
     MODEL.to(device)
     MODEL.eval()
+    if device.type == 'cpu':
+        MODEL = MODEL.half()
     print(f"✅ Model loaded successfully on {device}")
 
 # ------------------------
@@ -198,7 +206,7 @@ def signup():
     username = data.get('name') or data.get('username')
     email = data.get('email')
     password = data.get('password')
-    phone = data.get('phone')  # <-- ADDED: Get phone from request
+    phone = data.get('phone') 
 
     if not all([username, email, password]):
         return jsonify({"status": "error", "message": "Missing fields"}), 400
@@ -208,13 +216,12 @@ def signup():
         return jsonify({"status": "error", "message": "Username or email already exists"}), 409
 
     hashed = bcrypt.generate_password_hash(password).decode('utf-8')
-    # <-- ADDED: 'phone=phone' to save it in the database
     user = User(username=username, email=email, phone=phone, password_hash=hashed)
     
     try:
         db.session.add(user)
         db.session.commit()
-        return jsonify({"status": "success", "message": "User registered", "user_id": user.id}), 201
+        return jsonify({"status": "success", "message": "User registered! Now Login", "user_id": user.id}), 201
     except Exception as e:
         db.session.rollback()
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -230,7 +237,7 @@ def login():
 
     user = User.query.filter_by(email=email).first()
     if user and bcrypt.check_password_hash(user.password_hash, password):
-        return jsonify({"status":"success","user_id":user.id, "username": user.username})
+        return jsonify({"status":"success","user_id":user.id, "username": user.username,"phone": user.phone})
     else:
         return jsonify({"status":"error","message":"Invalid credentials"}), 401
 
@@ -298,9 +305,11 @@ def predict():
         return jsonify({"status": "error", "message": "Missing user_id or image"}), 400
 
     filestr = file.read()
+
+    if len(filestr) > 3 * 1024 * 1024:  # 3 MB limit
+        return jsonify({"status": "error", "message": "Image too large. Please upload a smaller image (<3MB)."}), 400
     
-    # --- THIS IS THE LINE THAT IS FIXED ---
-    # We replace the old np.fromstring with the modern np.frombuffer
+
     npimg = np.frombuffer(filestr, np.uint8)
    
     
@@ -316,6 +325,7 @@ def predict():
     blob = cv2.dnn.blobFromImage(cv2.resize(image_cv, (300, 300)), 1.0,
         (300, 300), (104.0, 177.0, 123.0))
 
+    net = get_face_net()
     net.setInput(blob)
     detections = net.forward()
 
@@ -348,13 +358,18 @@ def predict():
         except Exception as e:
             db.session.rollback()
             print("Warning: failed to save automatic scan:", e)
-
+        
+        del image_cv, face_roi, face_pil, npimg, filestr, blob, detections
+        gc.collect()
+        torch.cuda.empty_cache()
         return jsonify({"status": "success", **result}), 200
     except Exception as e:
         print("Prediction failed:", e)
+        gc.collect()
+        torch.cuda.empty_cache()
         return jsonify({"status": "error", "message": f"Prediction failed: {e}"}), 500
     
-# In app.py, add this entire new function
+
 @app.route('/api/selftest')
 def selftest():
     global MODEL
@@ -549,7 +564,6 @@ def index():
     return send_from_directory('static', 'intro.html') 
 @app.route('/<path:path>')
 def serve_static_files(path):
-    # This serves all the other files like login.html, style.css, etc.
     return send_from_directory('static', path)
 
 # ------------------------

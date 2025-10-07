@@ -220,7 +220,7 @@ function toggleForms(){
   document.getElementById('login-form').classList.toggle('hidden');
 }
 
-// --- SIGNUP FUNCTION ---
+
 // --- SIGNUP FUNCTION ---
 async function signup(){
     const name = document.getElementById('signup-name').value;
@@ -242,15 +242,15 @@ async function signup(){
         const response = await fetch(`${API_BASE_URL}/signup`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: name, email, password })  // ✅ FIXED: send "username" not "name"
+            body: JSON.stringify({ username: name, email, password }) 
         });
 
         const result = await response.json();
 
-        if (response.ok) {
+    if (response.ok) {
             // Show a success pop-up
     Swal.fire({
-        icon: 'success',  // This adds the green tick mark!
+        icon: 'success',  
         title: 'Registered!',
         text: result.message,
         timer: 2000,      // Pop-up will close automatically after 2 seconds
@@ -318,15 +318,15 @@ async function signup(){
       timer: 2000,
       showConfirmButton: false
     }).then(() => {
-      // Store login user info
       localStorage.setItem('userId', result.user_id);
       localStorage.setItem('userName', result.username);
+      localStorage.setItem('phone', result.phone);
       // Go to precautions page after login
       window.location.href = 'precautions.html';
     });
 } else {
     Swal.fire({
-      icon: 'error', // This adds a red "X" icon
+      icon: 'error',
       title: 'Login Failed',
       text: result.message
     });
