@@ -193,8 +193,6 @@ def load_model():
 
     MODEL.to(device)
     MODEL.eval()
-    if device.type == 'cpu':
-        MODEL = MODEL.half()
     print(f"✅ Model loaded successfully on {device}")
 
 # ------------------------
